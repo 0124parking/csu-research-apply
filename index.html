@@ -904,9 +904,11 @@ function goStep(n) {
   curStep = n;
   document.getElementById('step'+curStep).style.display = 'block';
   updateStepUI(n);
-  if(n === 2) updateSubSections();
-  if(n === 3) buildDocUploadSections();
-  if(n === 4) buildReview();
+  setTimeout(() => {
+    if(n === 2) updateSubSections();
+    if(n === 3) buildDocUploadSections();
+    if(n === 4) buildReview();
+  }, 50);
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
