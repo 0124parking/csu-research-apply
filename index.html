@@ -885,7 +885,8 @@ function toggleType(el) {
   const t = el.dataset.t;
   if(selTypes.has(t)) { selTypes.delete(t); el.classList.remove('selected'); }
   else { selTypes.add(t); el.classList.add('selected'); }
-  updateSubSections();
+  // 1단계에서는 DOM이 없으므로 updateSubSections 호출 안 함
+  // 2단계로 이동할 때 goStep(2)에서 호출됨
 }
 
 // ── 단계 이동 ──
@@ -932,28 +933,34 @@ function updateStepUI(n) {
 }
 
 function updateSubSections() {
+  // 논문
   const showPaper = selTypes.has('paper');
-  const secPaper = document.getElementById('sec_paper');
-  if(secPaper) {
-    secPaper.style.display = showPaper ? 'block' : 'none';
-    if(showPaper) { if(papers.length === 0) addPaper(); else renderPapers(); }
-    else { papers = []; }
+  document.getElementById('sec_paper').style.display = showPaper ? 'block' : 'none';
+  if(showPaper) {
+    if(papers.length === 0) addPaper();
+    else renderPapers();
+  } else {
+    papers = [];
   }
 
+  // 발표
   const showPresent = selTypes.has('present');
-  const secPresent = document.getElementById('sec_present');
-  if(secPresent) {
-    secPresent.style.display = showPresent ? 'block' : 'none';
-    if(showPresent) { if(presents.length === 0) addPresent(); else renderPresents(); }
-    else { presents = []; }
+  document.getElementById('sec_present').style.display = showPresent ? 'block' : 'none';
+  if(showPresent) {
+    if(presents.length === 0) addPresent();
+    else renderPresents();
+  } else {
+    presents = [];
   }
 
+  // 단순참여
   const showAttend = selTypes.has('attend');
-  const secAttend = document.getElementById('sec_attend');
-  if(secAttend) {
-    secAttend.style.display = showAttend ? 'block' : 'none';
-    if(showAttend) { if(attends.length === 0) addAttend(); else renderAttends(); }
-    else { attends = []; }
+  document.getElementById('sec_attend').style.display = showAttend ? 'block' : 'none';
+  if(showAttend) {
+    if(attends.length === 0) addAttend();
+    else renderAttends();
+  } else {
+    attends = [];
   }
 }
 
