@@ -681,6 +681,15 @@ function togglePrivacy() {
 // ── 발표 목록 관리 ──
 let presents = [];
 
+function updatePresent(id, field, val) {
+  const p = presents.find(p=>p.id===id);
+  if(p) { p[field]=val; calcTotal(); }
+}
+function updateAttend(id, field, val) {
+  const a = attends.find(a=>a.id===id);
+  if(a) { a[field]=val; calcTotal(); }
+}
+
 function addPresent() {
   presents.push({ id: Date.now(), name:'', organizer:'', date:'', location:'' });
   renderPresents();
@@ -694,24 +703,24 @@ function renderPresents() {
   const c = document.getElementById('presentList');
   if(!c) return;
   c.innerHTML = presents.map((p,i) => `
-    <div style="border:1px solid #c5d9f5;border-radius:10px;padding:1rem;margin-bottom:.75rem;background:#fff;position:relative;">
+    <div style="border:1px solid #c5d9f5;border-radius:10px;padding:1rem;margin-bottom:.75rem;background:#fff;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;">
         <span style="font-size:13px;font-weight:700;color:var(--green);">발표 ${i+1} &nbsp;<span style="font-size:12px;">40,000원</span></span>
         ${presents.length>1?`<span onclick="removePresent(${p.id})" style="font-size:12px;color:#e53935;cursor:pointer;padding:3px 8px;border:1px solid #ffcdd2;border-radius:6px;">삭제</span>`:''}
       </div>
       <div class="field"><label>학술대회(세미나/워크숍) 명칭 <span class="req">*</span></label>
-        <input placeholder="학술대회 명칭" oninput="presents[${i}].name=this.value;calcTotal()">
+        <input placeholder="학술대회 명칭" value="${p.name||''}" oninput="updatePresent(${p.id},'name',this.value)">
       </div>
       <div class="grid2">
         <div class="field"><label>주관 학회명 <span class="req">*</span></label>
-          <input placeholder="주관 학회명" oninput="presents[${i}].organizer=this.value">
+          <input placeholder="주관 학회명" value="${p.organizer||''}" oninput="updatePresent(${p.id},'organizer',this.value)">
         </div>
         <div class="field"><label>개최일 <span class="req">*</span></label>
-          <input type="date" oninput="presents[${i}].date=this.value">
+          <input type="date" value="${p.date||''}" oninput="updatePresent(${p.id},'date',this.value)">
         </div>
       </div>
       <div class="field"><label>학술대회 장소 <span class="req">*</span></label>
-        <input placeholder="예) 서울대학교 행정관 302호" oninput="presents[${i}].location=this.value">
+        <input placeholder="예) 서울대학교 행정관 302호" value="${p.location||''}" oninput="updatePresent(${p.id},'location',this.value)">
       </div>
     </div>`).join('');
   calcTotal();
@@ -733,28 +742,28 @@ function renderAttends() {
   const c = document.getElementById('attendList');
   if(!c) return;
   c.innerHTML = attends.map((a,i) => `
-    <div style="border:1px solid var(--gray-border);border-radius:10px;padding:1rem;margin-bottom:.75rem;background:#fff;position:relative;">
+    <div style="border:1px solid var(--gray-border);border-radius:10px;padding:1rem;margin-bottom:.75rem;background:#fff;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;">
         <span style="font-size:13px;font-weight:700;color:var(--blue);">단순참여 ${i+1}</span>
         ${attends.length>1?`<span onclick="removeAttend(${a.id})" style="font-size:12px;color:#e53935;cursor:pointer;padding:3px 8px;border:1px solid #ffcdd2;border-radius:6px;">삭제</span>`:''}
       </div>
       <div class="field"><label>학술대회(세미나/워크숍) 명칭 <span class="req">*</span></label>
-        <input placeholder="학술대회 명칭" oninput="attends[${i}].name=this.value">
+        <input placeholder="학술대회 명칭" value="${a.name||''}" oninput="updateAttend(${a.id},'name',this.value)">
       </div>
       <div class="grid2">
         <div class="field"><label>주관 학회명 <span class="req">*</span></label>
-          <input placeholder="주관 학회명" oninput="attends[${i}].organizer=this.value">
+          <input placeholder="주관 학회명" value="${a.organizer||''}" oninput="updateAttend(${a.id},'organizer',this.value)">
         </div>
         <div class="field"><label>개최일 <span class="req">*</span></label>
-          <input type="date" oninput="attends[${i}].date=this.value">
+          <input type="date" value="${a.date||''}" oninput="updateAttend(${a.id},'date',this.value)">
         </div>
       </div>
       <div class="field"><label>학술대회 장소 <span class="req">*</span></label>
-        <input placeholder="예) 서울대학교 행정관 302호" oninput="attends[${i}].location=this.value">
+        <input placeholder="예) 서울대학교 행정관 302호" value="${a.location||''}" oninput="updateAttend(${a.id},'location',this.value)">
       </div>
       <div class="field"><label>실 참가비 (원) <span class="req">*</span></label>
         <input type="number" placeholder="예: 10000" min="0" value="${a.fee||''}"
-          oninput="attends[${i}].fee=parseInt(this.value)||0;calcTotal()">
+          oninput="updateAttend(${a.id},'fee',parseInt(this.value)||0);calcTotal()">
       </div>
     </div>`).join('');
   calcTotal();
@@ -766,34 +775,41 @@ function normalize(str) {
 }
 
 function calcTotal() {
-  const dupWarnings = []; // 중복으로 제외된 단순참여 이름 목록
+  if(!selTypes.has('attend') || !selTypes.has('present')) {
+    // 중복 없음 - 그냥 계산
+    const totalFee = attends.reduce((s,a)=>s+(a.fee||0), 0);
+    const attendAmt = Math.min(totalFee, 30000);
+    _updateAttendUI(attendAmt, totalFee, []);
+    return { attendAmt, totalAttendFee: totalFee, dupWarnings: [] };
+  }
 
-  let validAttends = attends.filter(a => {
-    if(!selTypes.has('present')) return true;
+  // 발표와 단순참여 동시 선택 - 중복 체크
+  const dupWarnings = [];
+  const validAttends = attends.filter(a => {
     const aName = normalize(a.name);
     const aDate = (a.date||'').trim();
     if(!aName) return true;
-
-    // 이름이 같거나(대소문자/공백 무시), 날짜도 같으면 중복
     const isDup = presents.some(p => {
       const pName = normalize(p.name);
       const pDate = (p.date||'').trim();
       if(!pName) return false;
-      // 이름 동일 + 날짜 동일(또는 둘 중 하나라도 비어있으면 이름만으로 판단)
       const nameMatch = pName === aName;
       const dateMatch = !aDate || !pDate || aDate === pDate;
       return nameMatch && dateMatch;
     });
-
     if(isDup) dupWarnings.push(a.name.trim());
     return !isDup;
   });
 
   const totalAttendFee = validAttends.reduce((s,a)=>s+(a.fee||0), 0);
   const attendAmt = Math.min(totalAttendFee, 30000);
+  _updateAttendUI(attendAmt, totalAttendFee, dupWarnings);
+  return { attendAmt, totalAttendFee, dupWarnings };
+}
+
+function _updateAttendUI(attendAmt, totalFee, dupWarnings) {
   const preview = document.getElementById('attendAmountPreview');
   const label = document.getElementById('attendAmtLabel');
-
   if(preview) {
     let msg = '';
     if(dupWarnings.length > 0) {
@@ -801,9 +817,9 @@ function calcTotal() {
       msg += dupWarnings.map(n=>`&nbsp;&nbsp;· ${n}`).join('<br>');
       msg += `</div>`;
     }
-    if(totalAttendFee > 0) {
+    if(totalFee > 0) {
       preview.style.display = 'block';
-      msg += `유효 합산 참가비 ${totalAttendFee.toLocaleString()}원 → <strong>지원 예정: ${attendAmt.toLocaleString()}원</strong>${totalAttendFee>30000?' (최대 30,000원 한도)':''}`;
+      msg += `유효 합산 참가비 ${totalFee.toLocaleString()}원 → <strong>지원 예정: ${attendAmt.toLocaleString()}원</strong>${totalFee>30000?' (최대 30,000원 한도)':''}`;
     } else if(dupWarnings.length > 0) {
       preview.style.display = 'block';
       msg += `<span style="color:#e53935;">모든 단순참여가 발표와 중복되어 지원금이 없습니다.</span>`;
@@ -818,8 +834,8 @@ function calcTotal() {
       : `지원 예정: ${attendAmt.toLocaleString()}원 (최대 30,000원)`;
     label.style.color = dupWarnings.length > 0 ? '#e53935' : 'var(--blue)';
   }
-  return { attendAmt, totalAttendFee, dupWarnings };
 }
+
 
 // ── 단순참여 실비 계산 미리보기 (calcTotal로 대체) ──
 function updateAttendAmount() { calcTotal(); }
@@ -957,7 +973,7 @@ function validateStep2() {
       }
     }
   }
-  if(!ok) alert('필수 항목(*)을 모두 입력해주세요.');
+  if(!ok && document.activeElement) document.activeElement.scrollIntoView({behavior:'smooth',block:'center'});
   if(ok) {
     const privacy = document.querySelector('input[name="privacy"]:checked');
     if(!privacy) {
@@ -1017,7 +1033,6 @@ function buildReview() {
   const eligiblePapers = papers.filter(p => p.nrf === '등재지' || p.nrf === '등재후보지');
   const ineligiblePapers = papers.filter(p => p.nrf === '해당없음');
   const paperAmt = eligiblePapers.length * 300000;
-  // 발표 건수 중 단순참여와 중복된 건은 발표비만 계산 (단순참여분 제외됨)
   const presentAmt = selTypes.has('present') ? presents.length * 40000 : 0;
   const tm = {
     paper:`논문 게재 (등재/등재후보 ${eligiblePapers.length}편 × 300,000원${ineligiblePapers.length>0?' / 해당없음 '+ineligiblePapers.length+'편 → 지원불가':''})`,
