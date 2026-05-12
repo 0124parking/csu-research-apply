@@ -378,25 +378,26 @@ footer{background:#1a1a2e;color:rgba(255,255,255,.4);text-align:center;padding:1
         <div class="warn-box" style="margin-top:.75rem">⚠사사 표기가 <strong>총신대학교 소속</strong>이어야 합니다. 다른 기관 사사 표기 시 지원 불가합니다.</div>
       </div>
 
-      <!-- 발표/단순참여 동적 컨테이너 -->
-      <div id="sec_present" style="display:none;margin-top:1rem;background:#f0faf2;border:1.5px solid #a5d6a7;border-radius:10px;padding:1.2rem;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;">
-          <span style="font-size:14px;font-weight:700;color:#2e7d32;">🎤 학술대회 발표 정보</span>
+      <!-- 발표 섹션 -->
+      <div id="sec_present" class="sub-section" style="display:none">
+        <div class="sub-title" style="justify-content:space-between;">
+          <span>🎤 학술대회 발표 정보</span>
           <span style="font-size:12px;color:var(--green);font-weight:700;">건당 40,000원</span>
         </div>
-        <div style="font-size:12px;color:#374151;background:#fff;padding:.6rem .9rem;border-radius:7px;margin-bottom:.75rem;">ℹ 발표한 학술대회가 여러 개이면 <strong>"발표 추가"</strong> 버튼을 눌러 추가 입력하세요.</div>
+        <div class="info-box" style="margin-bottom:1rem;">ℹ 발표한 학술대회가 여러 개이면 <strong>"발표 추가"</strong> 버튼을 눌러 추가 입력하세요.</div>
         <div id="presentList"></div>
-        <button type="button" onclick="addPresent()" style="width:100%;padding:10px;border:1.5px dashed #2e7d32;border-radius:9px;background:#e8f5e9;color:#2e7d32;font-size:13px;font-weight:700;cursor:pointer;margin-top:.5rem;font-family:inherit;">+ 발표 추가</button>
+        <button type="button" onclick="addPresent()" style="width:100%;padding:10px;border:1.5px dashed var(--green);border-radius:9px;background:var(--green-light);color:var(--green);font-size:13px;font-weight:700;cursor:pointer;margin-top:.5rem;font-family:inherit;">+ 발표 추가</button>
       </div>
 
-      <div id="sec_attend" style="display:none;margin-top:1rem;background:#e3f2fd;border:1.5px solid #90caf9;border-radius:10px;padding:1.2rem;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;">
-          <span style="font-size:14px;font-weight:700;color:#1565c0;">👥 학술대회 단순참여 정보</span>
+      <!-- 단순참여 섹션 -->
+      <div id="sec_attend" class="sub-section" style="display:none">
+        <div class="sub-title" style="justify-content:space-between;">
+          <span>👥 학술대회 단순참여 정보</span>
           <span style="font-size:12px;color:var(--blue);font-weight:700;" id="attendAmtLabel">실비 최대 30,000원</span>
         </div>
-        <div style="font-size:12px;color:#374151;background:#fff;padding:.6rem .9rem;border-radius:7px;margin-bottom:.75rem;">ℹ 단순참여한 학술대회가 여러 개이면 <strong>"참여 추가"</strong> 버튼을 눌러 추가하세요. 한 학기 합산 <strong>최대 30,000원</strong> 지원됩니다.</div>
+        <div class="info-box" style="margin-bottom:1rem;">ℹ 단순참여한 학술대회가 여러 개이면 <strong>"참여 추가"</strong> 버튼을 눌러 추가하세요. 한 학기 합산 <strong>최대 30,000원</strong> 지원됩니다.</div>
         <div id="attendList"></div>
-        <button type="button" onclick="addAttend()" style="width:100%;padding:10px;border:1.5px dashed #1565c0;border-radius:9px;background:#e3f2fd;color:#1565c0;font-size:13px;font-weight:700;cursor:pointer;margin-top:.5rem;font-family:inherit;">+ 참여 추가</button>
+        <button type="button" onclick="addAttend()" style="width:100%;padding:10px;border:1.5px dashed var(--blue);border-radius:9px;background:var(--blue-light);color:var(--blue);font-size:13px;font-weight:700;cursor:pointer;margin-top:.5rem;font-family:inherit;">+ 참여 추가</button>
         <div id="attendAmountPreview" style="margin-top:.75rem;font-size:13px;font-weight:700;color:var(--blue);text-align:right;display:none;"></div>
       </div>
 
@@ -883,8 +884,6 @@ function toggleType(el) {
   const t = el.dataset.t;
   if(selTypes.has(t)) { selTypes.delete(t); el.classList.remove('selected'); }
   else { selTypes.add(t); el.classList.add('selected'); }
-  // 1단계에서는 DOM이 없으므로 updateSubSections 호출 안 함
-  // 2단계로 이동할 때 goStep(2)에서 호출됨
 }
 
 // ── 단계 이동 ──
@@ -932,32 +931,27 @@ function updateStepUI(n) {
 
 function updateSubSections() {
   // 논문
-  const sp = document.getElementById('sec_paper');
   if(selTypes.has('paper')) {
-    sp.style.display = 'block';
-    if(papers.length === 0) addPaper(); else renderPapers();
+    document.getElementById('sec_paper').style.display = 'block';
+    papers = []; addPaper();
   } else {
-    sp.style.display = 'none';
+    document.getElementById('sec_paper').style.display = 'none';
     papers = [];
   }
-
   // 발표
-  const spr = document.getElementById('sec_present');
   if(selTypes.has('present')) {
-    spr.style.display = 'block';
-    if(presents.length === 0) addPresent(); else renderPresents();
+    document.getElementById('sec_present').style.display = 'block';
+    presents = []; addPresent();
   } else {
-    spr.style.display = 'none';
+    document.getElementById('sec_present').style.display = 'none';
     presents = [];
   }
-
   // 단순참여
-  const sat = document.getElementById('sec_attend');
   if(selTypes.has('attend')) {
-    sat.style.display = 'block';
-    if(attends.length === 0) addAttend(); else renderAttends();
+    document.getElementById('sec_attend').style.display = 'block';
+    attends = []; addAttend();
   } else {
-    sat.style.display = 'none';
+    document.getElementById('sec_attend').style.display = 'none';
     attends = [];
   }
 }
