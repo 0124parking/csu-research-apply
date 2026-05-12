@@ -900,17 +900,11 @@ function goStep(n) {
   }
   document.getElementById('step'+curStep).style.display = 'none';
   curStep = n;
-  const stepEl = document.getElementById('step'+curStep);
-  stepEl.style.display = 'block';
+  document.getElementById('step'+curStep).style.display = 'block';
   updateStepUI(n);
-  // DOM이 완전히 렌더링된 후 실행
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      if(n === 2) updateSubSections();
-      if(n === 3) buildDocUploadSections();
-      if(n === 4) buildReview();
-    });
-  });
+  if(n === 2) updateSubSections();
+  if(n === 3) buildDocUploadSections();
+  if(n === 4) buildReview();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -931,28 +925,40 @@ function updateStepUI(n) {
 
 function updateSubSections() {
   // 논문
-  if(selTypes.has('paper')) {
-    document.getElementById('sec_paper').style.display = 'block';
-    papers = []; addPaper();
-  } else {
-    document.getElementById('sec_paper').style.display = 'none';
-    papers = [];
+  const elPaper = document.getElementById('sec_paper');
+  if(elPaper) {
+    if(selTypes.has('paper')) {
+      elPaper.style.display = 'block';
+      if(papers.length === 0) addPaper();
+      else renderPapers();
+    } else {
+      elPaper.style.display = 'none';
+      papers = [];
+    }
   }
   // 발표
-  if(selTypes.has('present')) {
-    document.getElementById('sec_present').style.display = 'block';
-    presents = []; addPresent();
-  } else {
-    document.getElementById('sec_present').style.display = 'none';
-    presents = [];
+  const elPresent = document.getElementById('sec_present');
+  if(elPresent) {
+    if(selTypes.has('present')) {
+      elPresent.style.display = 'block';
+      if(presents.length === 0) addPresent();
+      else renderPresents();
+    } else {
+      elPresent.style.display = 'none';
+      presents = [];
+    }
   }
   // 단순참여
-  if(selTypes.has('attend')) {
-    document.getElementById('sec_attend').style.display = 'block';
-    attends = []; addAttend();
-  } else {
-    document.getElementById('sec_attend').style.display = 'none';
-    attends = [];
+  const elAttend = document.getElementById('sec_attend');
+  if(elAttend) {
+    if(selTypes.has('attend')) {
+      elAttend.style.display = 'block';
+      if(attends.length === 0) addAttend();
+      else renderAttends();
+    } else {
+      elAttend.style.display = 'none';
+      attends = [];
+    }
   }
 }
 
