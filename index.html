@@ -923,6 +923,102 @@ function updateStepUI(n) {
   });
 }
 
+// ── 논문 여러 편 관리 ──
+let papers = [];
+
+function addPaper() {
+  const id = Date.now();
+  papers.push({ id, title:'', journal:'', date:'', professor:'', nrf:'' });
+  renderPapers();
+  updatePaperAmount();
+}
+
+function removePaper(id) {
+  papers = papers.filter(p => p.id !== id);
+  renderPapers();
+  updatePaperAmount();
+}
+
+function renderPapers() {
+  const container = document.getElementById('paperList');
+  if(!container) return;
+  container.innerHTML = papers.map((p, idx) => `
+    <div style="border:1px solid var(--gray-border);border-radius:10px;padding:1rem;margin-bottom:.75rem;background:#fff;position:relative;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;">
+        <span style="font-size:13px;font-weight:700;color:var(--blue);">논문 ${idx+1} &nbsp;<span style="color:var(--green);font-size:12px;">300,000원</span></span>
+        ${papers.length > 1 ? `<span onclick="removePaper(${p.id})" style="font-size:12px;color:#e53935;cursor:pointer;padding:3px 8px;border:1px solid #ffcdd2;border-radius:6px;">삭제</span>` : ''}
+      </div>
+      <div class="field"><label>논문 제목 <span class="req">*</span></label>
+        <input id="ptitle_${p.id}" placeholder="논문 제목" oninput="updatePaperField(${p.id},'title',this.value)">
+      </div>
+      <div class="grid2">
+        <div class="field"><label>게재 학술지명 <span class="req">*</span></label>
+          <input id="pjournal_${p.id}" placeholder="KCI 등재(후보) 학술지명" oninput="updatePaperField(${p.id},'journal',this.value)">
+        </div>
+        <div class="field"><label>게재(예정)일 <span class="req">*</span></label>
+          <input type="date" id="pdate_${p.id}" oninput="updatePaperField(${p.id},'date',this.value)">
+        </div>
+      </div>
+      <div class="field"><label>지도교수 성함 <span class="req">*</span></label>
+        <input id="pprof_${p.id}" placeholder="지도교수 성함 (서명 서류 필수)" oninput="updatePaperField(${p.id},'professor',this.value)">
+      </div>
+      <div class="field">
+        <label>한국연구재단 등재(후보) 확인 여부 <span class="req">*</span></label>
+        <div class="radio-group">
+          ${['등재지','등재후보지','해당없음'].map(v=>`
+            <div class="radio-item ${p.nrf===v?'checked':''}" onclick="setPaperNrf(${p.id},'${v}',this)">
+              <input type="radio" name="nrf_${p.id}" value="${v}" ${p.nrf===v?'checked':''}>
+              <div class="radio-dot"></div>
+              <span class="radio-label">한국연구재단 ${v==='해당없음'?v:v}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function updatePaperField(id, field, val) {
+  const p = papers.find(p=>p.id===id);
+  if(p) p[field] = val;
+}
+
+function setPaperNrf(id, val, el) {
+  const p = papers.find(p=>p.id===id);
+  if(p) p.nrf = val;
+  el.closest('.radio-group').querySelectorAll('.radio-item').forEach(r=>r.classList.remove('checked'));
+  el.classList.add('checked');
+  // 해당없음 선택시 경고
+  const card = el.closest('[style*="border"]');
+  const existing = card?.querySelector('.nrf-warn');
+  if(existing) existing.remove();
+  if(val === '해당없음' && card) {
+    const warn = document.createElement('div');
+    warn.className = 'nrf-warn warn-box';
+    warn.style.marginTop = '8px';
+    warn.innerHTML = '⚠ <strong>해당없음</strong> 선택 시 지원비(300,000원)가 지급되지 않습니다. 한국연구재단 등재지 또는 등재후보지에 게재된 논문만 지원 가능합니다.';
+    el.closest('.field').after(warn);
+  }
+  updatePaperAmount();
+}
+
+function updatePaperAmount() {
+  const el = document.getElementById('paperAmtPreview');
+  if(el) {
+    const eligible = papers.filter(p => p.nrf === '등재지' || p.nrf === '등재후보지').length;
+    const ineligible = papers.filter(p => p.nrf === '해당없음').length;
+    const total = papers.length;
+    if(total === 0) { el.textContent = ''; return; }
+    let msg = '';
+    if(eligible > 0) msg += `지원 가능 ${eligible}편 × 300,000원 = ${(eligible*300000).toLocaleString()}원`;
+    if(ineligible > 0) msg += (msg?' / ':'') + `지원 불가 ${ineligible}편 (해당없음)`;
+    el.textContent = msg;
+    el.style.color = ineligible > 0 ? '#e53935' : 'var(--green)';
+  }
+}
+
+function getNrf() {
+  return papers.length > 0 ? papers.map(p=>p.nrf||'미선택').join(', ') : '';
+}
+
 function updateSubSections() {
   // 논문
   const elPaper = document.getElementById('sec_paper');
@@ -1098,101 +1194,7 @@ function buildReview() {
 
 // ── 제출 ──
 
-// ── 논문 여러 편 관리 ──
-let papers = [];
 
-function addPaper() {
-  const id = Date.now();
-  papers.push({ id, title:'', journal:'', date:'', professor:'', nrf:'' });
-  renderPapers();
-  updatePaperAmount();
-}
-
-function removePaper(id) {
-  papers = papers.filter(p => p.id !== id);
-  renderPapers();
-  updatePaperAmount();
-}
-
-function renderPapers() {
-  const container = document.getElementById('paperList');
-  if(!container) return;
-  container.innerHTML = papers.map((p, idx) => `
-    <div style="border:1px solid var(--gray-border);border-radius:10px;padding:1rem;margin-bottom:.75rem;background:#fff;position:relative;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;">
-        <span style="font-size:13px;font-weight:700;color:var(--blue);">논문 ${idx+1} &nbsp;<span style="color:var(--green);font-size:12px;">300,000원</span></span>
-        ${papers.length > 1 ? `<span onclick="removePaper(${p.id})" style="font-size:12px;color:#e53935;cursor:pointer;padding:3px 8px;border:1px solid #ffcdd2;border-radius:6px;">삭제</span>` : ''}
-      </div>
-      <div class="field"><label>논문 제목 <span class="req">*</span></label>
-        <input id="ptitle_${p.id}" placeholder="논문 제목" oninput="updatePaperField(${p.id},'title',this.value)">
-      </div>
-      <div class="grid2">
-        <div class="field"><label>게재 학술지명 <span class="req">*</span></label>
-          <input id="pjournal_${p.id}" placeholder="KCI 등재(후보) 학술지명" oninput="updatePaperField(${p.id},'journal',this.value)">
-        </div>
-        <div class="field"><label>게재(예정)일 <span class="req">*</span></label>
-          <input type="date" id="pdate_${p.id}" oninput="updatePaperField(${p.id},'date',this.value)">
-        </div>
-      </div>
-      <div class="field"><label>지도교수 성함 <span class="req">*</span></label>
-        <input id="pprof_${p.id}" placeholder="지도교수 성함 (서명 서류 필수)" oninput="updatePaperField(${p.id},'professor',this.value)">
-      </div>
-      <div class="field">
-        <label>한국연구재단 등재(후보) 확인 여부 <span class="req">*</span></label>
-        <div class="radio-group">
-          ${['등재지','등재후보지','해당없음'].map(v=>`
-            <div class="radio-item ${p.nrf===v?'checked':''}" onclick="setPaperNrf(${p.id},'${v}',this)">
-              <input type="radio" name="nrf_${p.id}" value="${v}" ${p.nrf===v?'checked':''}>
-              <div class="radio-dot"></div>
-              <span class="radio-label">한국연구재단 ${v==='해당없음'?v:v}</span>
-            </div>`).join('')}
-        </div>
-      </div>
-    </div>`).join('');
-}
-
-function updatePaperField(id, field, val) {
-  const p = papers.find(p=>p.id===id);
-  if(p) p[field] = val;
-}
-
-function setPaperNrf(id, val, el) {
-  const p = papers.find(p=>p.id===id);
-  if(p) p.nrf = val;
-  el.closest('.radio-group').querySelectorAll('.radio-item').forEach(r=>r.classList.remove('checked'));
-  el.classList.add('checked');
-  // 해당없음 선택시 경고
-  const card = el.closest('[style*="border"]');
-  const existing = card?.querySelector('.nrf-warn');
-  if(existing) existing.remove();
-  if(val === '해당없음' && card) {
-    const warn = document.createElement('div');
-    warn.className = 'nrf-warn warn-box';
-    warn.style.marginTop = '8px';
-    warn.innerHTML = '⚠ <strong>해당없음</strong> 선택 시 지원비(300,000원)가 지급되지 않습니다. 한국연구재단 등재지 또는 등재후보지에 게재된 논문만 지원 가능합니다.';
-    el.closest('.field').after(warn);
-  }
-  updatePaperAmount();
-}
-
-function updatePaperAmount() {
-  const el = document.getElementById('paperAmtPreview');
-  if(el) {
-    const eligible = papers.filter(p => p.nrf === '등재지' || p.nrf === '등재후보지').length;
-    const ineligible = papers.filter(p => p.nrf === '해당없음').length;
-    const total = papers.length;
-    if(total === 0) { el.textContent = ''; return; }
-    let msg = '';
-    if(eligible > 0) msg += `지원 가능 ${eligible}편 × 300,000원 = ${(eligible*300000).toLocaleString()}원`;
-    if(ineligible > 0) msg += (msg?' / ':'') + `지원 불가 ${ineligible}편 (해당없음)`;
-    el.textContent = msg;
-    el.style.color = ineligible > 0 ? '#e53935' : 'var(--green)';
-  }
-}
-
-function getNrf() {
-  return papers.length > 0 ? papers.map(p=>p.nrf||'미선택').join(', ') : '';
-}
 
 function selectNrf(el, val) {}  // 하위 호환용
 
