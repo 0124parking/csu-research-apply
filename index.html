@@ -933,19 +933,28 @@ function updateStepUI(n) {
 
 function updateSubSections() {
   const showPaper = selTypes.has('paper');
-  document.getElementById('sec_paper').style.display = showPaper ? 'block' : 'none';
-  if(showPaper && papers.length === 0) { addPaper(); }
-  if(!showPaper) { papers = []; renderPapers(); }
+  const secPaper = document.getElementById('sec_paper');
+  if(secPaper) {
+    secPaper.style.display = showPaper ? 'block' : 'none';
+    if(showPaper) { if(papers.length === 0) addPaper(); else renderPapers(); }
+    else { papers = []; }
+  }
 
   const showPresent = selTypes.has('present');
-  document.getElementById('sec_present').style.display = showPresent ? 'block' : 'none';
-  if(showPresent && presents.length === 0) { addPresent(); }
-  if(!showPresent) { presents = []; renderPresents(); }
+  const secPresent = document.getElementById('sec_present');
+  if(secPresent) {
+    secPresent.style.display = showPresent ? 'block' : 'none';
+    if(showPresent) { if(presents.length === 0) addPresent(); else renderPresents(); }
+    else { presents = []; }
+  }
 
   const showAttend = selTypes.has('attend');
-  document.getElementById('sec_attend').style.display = showAttend ? 'block' : 'none';
-  if(showAttend && attends.length === 0) { addAttend(); }
-  if(!showAttend) { attends = []; renderAttends(); }
+  const secAttend = document.getElementById('sec_attend');
+  if(secAttend) {
+    secAttend.style.display = showAttend ? 'block' : 'none';
+    if(showAttend) { if(attends.length === 0) addAttend(); else renderAttends(); }
+    else { attends = []; }
+  }
 }
 
 function validateStep2() {
