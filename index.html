@@ -365,6 +365,43 @@ footer{background:#1a1a2e;color:rgba(255,255,255,.4);text-align:center;padding:1
         <div class="field"><label>계좌번호 <span class="req">*</span></label><input id="f_acct_num" placeholder="예) 000-0000-0000-00  (-표시)" type="text"></div>
       </div>
 
+
+      <!-- 논문 -->
+      <div id="sec_paper" class="sub-section" style="display:none">
+        <div class="sub-title" style="justify-content:space-between;">
+          <span>📖논문 게재 정보</span>
+          <span style="font-size:12px;color:var(--blue);font-weight:700;" id="paperAmtPreview"></span>
+        </div>
+        <div class="info-box" style="margin-bottom:1rem;">ℹ 논문은 편수 제한 없이 <strong>편당 300,000원</strong> 지원됩니다. 논문이 여러 편이면 아래 <strong>"논문 추가"</strong> 버튼을 눌러 추가 입력하세요.</div>
+        <div id="paperList"></div>
+        <button type="button" onclick="addPaper()" style="width:100%;padding:10px;border:1.5px dashed var(--blue);border-radius:9px;background:var(--blue-light);color:var(--blue);font-size:13px;font-weight:700;cursor:pointer;margin-top:.5rem;font-family:inherit;">+ 논문 추가</button>
+        <div class="warn-box" style="margin-top:.75rem">⚠사사 표기가 <strong>총신대학교 소속</strong>이어야 합니다. 다른 기관 사사 표기 시 지원 불가합니다.</div>
+      </div>
+
+      <!-- 학술대회 -->
+      <!-- 발표 섹션 -->
+      <div id="sec_present" class="sub-section" style="display:none">
+        <div class="sub-title" style="justify-content:space-between;">
+          <span>🎤 학술대회 발표 정보</span>
+          <span style="font-size:12px;color:var(--green);font-weight:700;">40,000원</span>
+        </div>
+        <div class="info-box" style="margin-bottom:1rem;">ℹ 발표한 학술대회가 여러 개이면 <strong>"발표 추가"</strong> 버튼을 눌러 추가 입력하세요.</div>
+        <div id="presentList"></div>
+        <button type="button" onclick="addPresent()" style="width:100%;padding:10px;border:1.5px dashed var(--green);border-radius:9px;background:var(--green-light);color:var(--green);font-size:13px;font-weight:700;cursor:pointer;margin-top:.5rem;font-family:inherit;">+ 발표 추가</button>
+      </div>
+
+      <!-- 단순참여 섹션 -->
+      <div id="sec_attend" class="sub-section" style="display:none;margin-top:1rem;">
+        <div class="sub-title" style="justify-content:space-between;">
+          <span>👥 학술대회 단순참여 정보</span>
+          <span style="font-size:12px;color:var(--blue);font-weight:700;" id="attendAmtLabel">실비 최대 30,000원</span>
+        </div>
+        <div class="info-box" style="margin-bottom:1rem;">ℹ 단순참여한 학술대회가 여러 개이면 <strong>"참여 추가"</strong> 버튼을 눌러 추가하세요. 한 학기 합산 <strong>최대 30,000원</strong> 지원됩니다.</div>
+        <div id="attendList"></div>
+        <button type="button" onclick="addAttend()" style="width:100%;padding:10px;border:1.5px dashed var(--blue);border-radius:9px;background:var(--blue-light);color:var(--blue);font-size:13px;font-weight:700;cursor:pointer;margin-top:.5rem;font-family:inherit;">+ 참여 추가</button>
+        <div id="attendAmountPreview" style="margin-top:.75rem;font-size:13px;font-weight:700;color:var(--blue);text-align:right;display:none;"></div>
+      </div>
+
       <!-- 개인정보 동의 -->
       <div style="margin-top:1.3rem;border:2px solid #e53935;border-radius:11px;overflow:hidden;">
         <div style="background:#e53935;padding:.7rem 1.1rem;display:flex;align-items:center;gap:7px;">
@@ -410,41 +447,6 @@ footer{background:#1a1a2e;color:rgba(255,255,255,.4);text-align:center;padding:1
         </div>
       </div>
 
-      <!-- 논문 -->
-      <div id="sec_paper" class="sub-section" style="display:none">
-        <div class="sub-title" style="justify-content:space-between;">
-          <span>📖논문 게재 정보</span>
-          <span style="font-size:12px;color:var(--blue);font-weight:700;" id="paperAmtPreview"></span>
-        </div>
-        <div class="info-box" style="margin-bottom:1rem;">ℹ 논문은 편수 제한 없이 <strong>편당 300,000원</strong> 지원됩니다. 논문이 여러 편이면 아래 <strong>"논문 추가"</strong> 버튼을 눌러 추가 입력하세요.</div>
-        <div id="paperList"></div>
-        <button type="button" onclick="addPaper()" style="width:100%;padding:10px;border:1.5px dashed var(--blue);border-radius:9px;background:var(--blue-light);color:var(--blue);font-size:13px;font-weight:700;cursor:pointer;margin-top:.5rem;font-family:inherit;">+ 논문 추가</button>
-        <div class="warn-box" style="margin-top:.75rem">⚠사사 표기가 <strong>총신대학교 소속</strong>이어야 합니다. 다른 기관 사사 표기 시 지원 불가합니다.</div>
-      </div>
-
-      <!-- 학술대회 -->
-      <!-- 발표 섹션 -->
-      <div id="sec_present" class="sub-section" style="display:none">
-        <div class="sub-title" style="justify-content:space-between;">
-          <span>🎤 학술대회 발표 정보</span>
-          <span style="font-size:12px;color:var(--green);font-weight:700;">40,000원</span>
-        </div>
-        <div class="info-box" style="margin-bottom:1rem;">ℹ 발표한 학술대회가 여러 개이면 <strong>"발표 추가"</strong> 버튼을 눌러 추가 입력하세요.</div>
-        <div id="presentList"></div>
-        <button type="button" onclick="addPresent()" style="width:100%;padding:10px;border:1.5px dashed var(--green);border-radius:9px;background:var(--green-light);color:var(--green);font-size:13px;font-weight:700;cursor:pointer;margin-top:.5rem;font-family:inherit;">+ 발표 추가</button>
-      </div>
-
-      <!-- 단순참여 섹션 -->
-      <div id="sec_attend" class="sub-section" style="display:none;margin-top:1rem;">
-        <div class="sub-title" style="justify-content:space-between;">
-          <span>👥 학술대회 단순참여 정보</span>
-          <span style="font-size:12px;color:var(--blue);font-weight:700;" id="attendAmtLabel">실비 최대 30,000원</span>
-        </div>
-        <div class="info-box" style="margin-bottom:1rem;">ℹ 단순참여한 학술대회가 여러 개이면 <strong>"참여 추가"</strong> 버튼을 눌러 추가하세요. 한 학기 합산 <strong>최대 30,000원</strong> 지원됩니다.</div>
-        <div id="attendList"></div>
-        <button type="button" onclick="addAttend()" style="width:100%;padding:10px;border:1.5px dashed var(--blue);border-radius:9px;background:var(--blue-light);color:var(--blue);font-size:13px;font-weight:700;cursor:pointer;margin-top:.5rem;font-family:inherit;">+ 참여 추가</button>
-        <div id="attendAmountPreview" style="margin-top:.75rem;font-size:13px;font-weight:700;color:var(--blue);text-align:right;display:none;"></div>
-      </div>
     </div>
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="goStep(1)">← 이전</button>
