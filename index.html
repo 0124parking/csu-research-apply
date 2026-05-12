@@ -1038,11 +1038,13 @@ const DOC_DEFS = {
 
 function buildDocUploadSections() {
   const container = document.getElementById('docUploadSections');
-  if(!container) return;
+  if(!container) { console.error('docUploadSections 없음'); return; }
   const sections = [];
+  console.log('selTypes:', [...selTypes]);
   if(selTypes.has('paper'))   sections.push({ title:'📖 논문 게재 서류', color:'#1a3a6e', bg:'#e8f0fb', keys:['paper_form','paper_cert','paper_copy','paper_receipt'] });
   if(selTypes.has('present')) sections.push({ title:'🎤 학술대회 발표 서류', color:'#2e7d32', bg:'#e8f5e9', keys:['present_form','present_pamphlet','present_receipt'] });
   if(selTypes.has('attend'))  sections.push({ title:'👥 학술대회 단순참여 서류', color:'#1565c0', bg:'#e3f2fd', keys:['attend_form','attend_pamphlet','attend_receipt'] });
+  console.log('섹션 수:', sections.length);
 
   container.innerHTML = sections.map(sec => `
     <div style="margin-bottom:1.25rem;border:2px solid ${sec.color};border-radius:12px;overflow:hidden;">
