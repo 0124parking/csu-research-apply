@@ -1512,6 +1512,100 @@ function exportCSV() {
   link.click();
 }
 
+
+// ── 카테고리별 서류 업로드 ──
+let docFiles = {};
+
+const DOC_DEFS = {
+  paper_form:      { label:'① 신청서 양식',           desc:'대학원 학생 연구활동지원비 신청서 (지도교수 서명 포함 필수)' },
+  paper_cert:      { label:'② 논문 게재(예정) 증명서', desc:'게재 확정 또는 게재 예정 증명서 원본' },
+  paper_copy:      { label:'③ 논문 게재 사본',         desc:'학술지 표지 및 목차가 반드시 포함된 논문 사본' },
+  paper_receipt:   { label:'④ 게재료 영수증 원본',     desc:'게재료 영수증 원본 (금액·참가자 이름 표기 필수)' },
+  present_form:    { label:'① 신청서 양식',            desc:'대학원 학생 연구활동지원비 신청서 (서명 포함 필수)' },
+  present_pamphlet:{ label:'② 팜플렛 표지',            desc:'학술대회 팜플렛 표지 사본' },
+  present_receipt: { label:'③ 참가 영수증 원본',       desc:'금액과 참가자 이름이 반드시 표기된 원본' },
+  attend_form:     { label:'① 신청서 양식',            desc:'대학원 학생 연구활동지원비 신청서 (서명 포함 필수)' },
+  attend_pamphlet: { label:'② 팜플렛 표지',            desc:'학술대회 팜플렛 표지 사본' },
+  attend_receipt:  { label:'③ 참가 영수증 원본',       desc:'금액과 참가자 이름이 반드시 표기된 원본' },
+};
+
+function buildDocUploadSections() {
+  const container = document.getElementById('docUploadSections');
+  if(!container) return;
+  const sections = [];
+  if(selTypes.has('paper'))   sections.push({ title:'📖 논문 게재 서류', color:'#1a3a6e', bg:'#e8f0fb', keys:['paper_form','paper_cert','paper_copy','paper_receipt'] });
+  if(selTypes.has('present')) sections.push({ title:'🎤 학술대회 발표 서류', color:'#2e7d32', bg:'#e8f5e9', keys:['present_form','present_pamphlet','present_receipt'] });
+  if(selTypes.has('attend'))  sections.push({ title:'👥 학술대회 단순참여 서류', color:'#1565c0', bg:'#e3f2fd', keys:['attend_form','attend_pamphlet','attend_receipt'] });
+
+  container.innerHTML = sections.map(sec => `
+    <div style="margin-bottom:1.25rem;border:2px solid ${sec.color};border-radius:12px;overflow:hidden;">
+      <div style="background:${sec.bg};padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:14px;font-weight:700;color:${sec.color};">${sec.title}</span>
+        <span style="background:#fee2e2;color:#991b1b;font-size:10px;font-weight:700;padding:2px 10px;border-radius:999px;">모두 필수</span>
+      </div>
+      <div style="padding:1rem;">
+        ${sec.keys.map(key => {
+          const def = DOC_DEFS[key];
+          const f = docFiles[key];
+          return `
+          <div style="margin-bottom:.85rem;">
+            <div style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:3px;">${def.label} <span style="color:#e53935;">*필수</span></div>
+            <div style="font-size:11px;color:#667085;margin-bottom:6px;">${def.desc}</div>
+            <div style="border:1.5px dashed ${f ? sec.color : '#d0d5dd'};border-radius:9px;padding:.85rem;text-align:center;cursor:pointer;background:${f ? sec.bg : '#fafbfd'};position:relative;"
+              id="zone_${key}"
+              ondragover="event.preventDefault();"
+              ondrop="event.preventDefault();handleDocFile('${key}',event.dataTransfer.files[0]);">
+              <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;"
+                onchange="handleDocFile('${key}',this.files[0])">
+              ${f
+                ? `<div style="color:${sec.color};font-size:13px;font-weight:600;">✅ ${f.name}</div>
+                   <div style="font-size:11px;color:#94a3b8;margin-top:2px;">${(f.size/1024).toFixed(0)} KB &nbsp;·&nbsp;
+                     <span style="color:#e53935;cursor:pointer;" onclick="event.stopPropagation();removeDocFile('${key}')">✕ 삭제</span></div>`
+                : `<div style="font-size:13px;color:#475569;">☁ 클릭하거나 파일을 드래그하세요</div>
+                   <div style="font-size:11px;color:#94a3b8;margin-top:3px;">PDF · JPG · PNG · 최대 20MB</div>`
+              }
+            </div>
+            <div id="err_${key}" style="display:none;color:#e53935;font-size:11px;margin-top:4px;font-weight:600;">⚠ 필수 서류입니다. 반드시 업로드해주세요.</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function handleDocFile(key, file) {
+  if(!file) return;
+  if(file.size > 20*1024*1024) { alert('파일 크기는 20MB 이하여야 합니다.'); return; }
+  docFiles[key] = file;
+  const errEl = document.getElementById('err_'+key);
+  if(errEl) errEl.style.display = 'none';
+  buildDocUploadSections();
+}
+
+function removeDocFile(key) {
+  delete docFiles[key];
+  buildDocUploadSections();
+}
+
+function validateDocFiles() {
+  const required = [];
+  if(selTypes.has('paper'))   required.push('paper_form','paper_cert','paper_copy','paper_receipt');
+  if(selTypes.has('present')) required.push('present_form','present_pamphlet','present_receipt');
+  if(selTypes.has('attend'))  required.push('attend_form','attend_pamphlet','attend_receipt');
+  let ok = true;
+  required.forEach(key => {
+    const errEl = document.getElementById('err_'+key);
+    if(!docFiles[key]) { if(errEl) errEl.style.display='block'; ok=false; }
+    else { if(errEl) errEl.style.display='none'; }
+  });
+  if(!ok) alert('누락된 서류가 있습니다! 모든 필수 서류를 업로드해야 지원금 지급이 가능합니다.');
+  return ok;
+}
+
+// 호환용
+function handleFiles(fl) {}
+function renderFiles() {}
+function rmFile(i) {}
+
 // 초기화
 showScreen('screenApply');
 </script>
