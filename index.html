@@ -902,13 +902,17 @@ function goStep(n) {
   }
   document.getElementById('step'+curStep).style.display = 'none';
   curStep = n;
-  document.getElementById('step'+curStep).style.display = 'block';
+  const stepEl = document.getElementById('step'+curStep);
+  stepEl.style.display = 'block';
   updateStepUI(n);
-  setTimeout(() => {
-    if(n === 2) updateSubSections();
-    if(n === 3) buildDocUploadSections();
-    if(n === 4) buildReview();
-  }, 50);
+  // DOM이 완전히 렌더링된 후 실행
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      if(n === 2) updateSubSections();
+      if(n === 3) buildDocUploadSections();
+      if(n === 4) buildReview();
+    });
+  });
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
